@@ -1,14 +1,15 @@
 'use client';
 import { useState } from 'react';
 import Square from './square';
+import GameStatus from './gameStatus';
 
 function Board() {
   const [squares, setSquares] = useState<Array<string | null>>(Array(16).fill(null));
-  const [xIsNext, setXIsNext] = useState(true); // Track whose turn it is
+  const [xIsNext, setXIsNext] = useState(true);
 
   function handleClick(i: number) {
     if (squares[i] || calculateWinner(squares)) {
-      return; // Ignore click if square is filled or game is won
+      return;
     }
     const nextSquares = squares.slice();
     nextSquares[i] = xIsNext ? 'X' : 'O';
@@ -24,25 +25,19 @@ function Board() {
   const winner = calculateWinner(squares);
 
   return (
-    <div className="flex flex-col items-center">
+    <div className="flex flex-col items-center p-4">
       <div className="grid grid-cols-4 gap-1 max-w-sm w-full">
         {squares.map((value, index) => (
           <Square key={index} value={value} onSquareClick={() => handleClick(index)} />
         ))}
       </div>
-      {winner && <div className="text-center mt-4 text-2xl font-bold">Winner: {winner}</div>}
-      <button 
-        onClick={handleReset} 
-        className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md shadow-md hover:bg-blue-600 transition duration-300"
-      >
-        Reset Game
-      </button>
+      <GameStatus winner={winner} onReset={handleReset} xIsNext={xIsNext} />
     </div>
   );
 }
 
 function calculateWinner(squares: Array<string | null>): string | null {
-  const lines = [
+  const winningCombos = [
     [0, 1, 2, 3], // Rows
     [4, 5, 6, 7],
     [8, 9, 10, 11],
@@ -55,8 +50,8 @@ function calculateWinner(squares: Array<string | null>): string | null {
     [3, 6, 9, 12]
   ];
 
-  for (let i = 0; i < lines.length; i++) {
-    const [a, b, c, d] = lines[i];
+  for (let combo of winningCombos) {
+    const [a, b, c, d] = combo;
     if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c] && squares[a] === squares[d]) {
       return squares[a];
     }
